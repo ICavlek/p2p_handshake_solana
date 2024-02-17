@@ -11,7 +11,9 @@ async fn main() -> anyhow::Result<()> {
         std::io::stdout,
     );
     init_subscriber(subscriber);
-    let solana_client = SolanaClient::new();
+
+    let uri = "http://127.0.0.1:8899";
+    let solana_client = SolanaClient::new(uri.to_owned());
     solana_client
         .handshake()
         .await
