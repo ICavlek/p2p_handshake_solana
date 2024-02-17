@@ -1,3 +1,4 @@
+use anyhow::Context;
 use reqwest::Client;
 use std::time::Duration;
 
@@ -17,16 +18,17 @@ impl SolanaClient {
     }
 
     #[tracing::instrument(name = "Handshake", skip(self))]
-    pub async fn handshake(&self) -> String {
+    pub async fn handshake(&self) -> Result<(), anyhow::Error> {
         self.http_client
             .post("http://127.0.0.1:8899")
             .header("Content-Type", "application/json")
             .body(r#"{"jsonrpc":"2.0","id":1,"method":"getHealth"}"#)
             .send()
             .await
-            .unwrap()
+            .context("Failed to connect to remote node")?
             .text()
             .await
-            .unwrap()
+            .context("Failed to create text from response")?;
+        Ok(())
     }
 }
