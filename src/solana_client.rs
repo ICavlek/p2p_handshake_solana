@@ -29,6 +29,9 @@ impl SolanaClient {
 
     #[tracing::instrument(name = "Invoking get health", skip(self))]
     pub async fn get_health(&self) -> Result<Response, anyhow::Error> {
+        // TODO Check Http Response - Based on this, either continue if OK or return Enum ConnectionError
+        // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
+        // Ok(), if not return DataError
         match self.send_request().await {
             Ok(response) => Ok(response),
             Err(_) => Err(anyhow!("Error")),

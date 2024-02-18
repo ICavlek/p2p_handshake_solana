@@ -13,3 +13,8 @@ async fn handshake_returns_200_for_valid_form_data() {
     let response = solana_client.get_health().await.unwrap();
     assert_eq!(response.status().as_u16(), 200);
 }
+
+// TODO Connection time out test
+// TODO Connection failed test
+// TODO Wrong data test
+// TODO Correct data test
