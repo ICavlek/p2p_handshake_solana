@@ -10,6 +10,6 @@ async fn handshake_returns_200_for_valid_form_data() {
         .respond_with(ResponseTemplate::new(200))
         .mount(&mock_server)
         .await;
-    let response = solana_client.handshake().await.unwrap();
+    let response = solana_client.get_health().await.unwrap();
     assert_eq!(response.status().as_u16(), 200);
 }
