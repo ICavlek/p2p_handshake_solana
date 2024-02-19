@@ -25,10 +25,11 @@ impl SolanaClient {
         // TODO Check Http Response - Based on this, either continue if OK or return Enum ConnectionError
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
-        let _response = match self.get_version().await {
-            Ok(_response) => Ok(()),
-            Err(e) => Err(e),
-        };
+        let response = self.get_version().await.context("Failed to get version")?;
+        let status = response.status();
+        println!("{}", status);
+        let data = response.text().await?;
+        println!("{}", data);
         tracing::info!("Handshake ended succesfully!");
         Ok(())
     }
