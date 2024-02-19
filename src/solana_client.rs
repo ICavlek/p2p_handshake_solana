@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context};
+use anyhow::Context;
 use reqwest::{Client, Response};
 use std::time::Duration;
 
@@ -38,7 +38,7 @@ impl SolanaClient {
         let data = DataSend::new();
         match self.send_request(data).await {
             Ok(response) => Ok(response),
-            Err(_) => Err(anyhow!("Error")),
+            Err(e) => Err(e.into()),
         }
     }
 
