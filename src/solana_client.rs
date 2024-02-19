@@ -1,5 +1,5 @@
 use anyhow::Context;
-use reqwest::{Client, Response};
+use reqwest::{Client, Response, StatusCode};
 use std::time::Duration;
 
 use crate::domain::DataSend;
@@ -33,8 +33,8 @@ impl SolanaClient {
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
         let response = self.get_version().await.context("Failed to get version")?;
-        match response.status().as_u16() {
-            200 => tracing::info!("Remote node returned 200 OK"),
+        match response.status() {
+            StatusCode::OK => tracing::info!("Remote node returned 200 OK"),
             _ => return Err(SolanaClientError::HttpResponseError),
         };
 
