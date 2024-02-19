@@ -17,3 +17,9 @@ impl DataSend {
         }
     }
 }
+
+impl Default for DataSend {
+    fn default() -> Self {
+        Self::new()
+    }
+}
