@@ -27,8 +27,8 @@ impl SolanaClient {
         Ok(())
     }
 
-    #[tracing::instrument(name = "Invoking get health", skip(self))]
-    pub async fn get_health(&self) -> Result<Response, anyhow::Error> {
+    #[tracing::instrument(name = "Invoking get version", skip(self))]
+    pub async fn get_version(&self) -> Result<Response, anyhow::Error> {
         // TODO Check Http Response - Based on this, either continue if OK or return Enum ConnectionError
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
@@ -43,7 +43,7 @@ impl SolanaClient {
         self.http_client
             .post(&self.uri)
             .header("Content-Type", "application/json")
-            .body(r#"{"jsonrpc":"2.0","id":1,"method":"getHealth"}"#)
+            .body(r#"{"jsonrpc":"2.0","id":1,"method":"getVersion"}"#)
             .send()
             .await
     }
