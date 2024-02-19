@@ -22,24 +22,23 @@ impl SolanaClient {
 
     #[tracing::instrument(name = "Handshake", skip(self))]
     pub async fn handshake(&self) -> Result<(), anyhow::Error> {
-        let data = DataSend::new();
-        self.send_request(data)
-            .await
-            .context("Failed to connect to remote node")?;
+        // TODO Check Http Response - Based on this, either continue if OK or return Enum ConnectionError
+        // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
+        // Ok(), if not return DataError
+        let _response = match self.get_version().await {
+            Ok(_response) => Ok(()),
+            Err(e) => Err(e),
+        };
         tracing::info!("Handshake ended succesfully!");
         Ok(())
     }
 
     #[tracing::instrument(name = "Invoking get version", skip(self))]
     pub async fn get_version(&self) -> Result<Response, anyhow::Error> {
-        // TODO Check Http Response - Based on this, either continue if OK or return Enum ConnectionError
-        // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
-        // Ok(), if not return DataError
         let data = DataSend::new();
-        match self.send_request(data).await {
-            Ok(response) => Ok(response),
-            Err(e) => Err(e.into()),
-        }
+        self.send_request(data)
+            .await
+            .context("Failed to connect to remote node")
     }
 
     #[tracing::instrument(name = "Sending HTTP request", skip(self))]
