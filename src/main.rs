@@ -12,7 +12,9 @@ async fn main() -> anyhow::Result<()> {
     );
     init_subscriber(subscriber);
 
+    // TODO Parse uri and timeout argument
     let uri = "http://127.0.0.1:8899";
+    // TODO Document class
     let solana_client = SolanaClient::new(uri.to_owned());
     solana_client
         .handshake()
