@@ -2,6 +2,8 @@ use anyhow::{anyhow, Context};
 use reqwest::{Client, Response};
 use std::time::Duration;
 
+use crate::domain::DataSend;
+
 #[derive(Debug)]
 pub struct SolanaClient {
     http_client: Client,
@@ -20,7 +22,8 @@ impl SolanaClient {
 
     #[tracing::instrument(name = "Handshake", skip(self))]
     pub async fn handshake(&self) -> Result<(), anyhow::Error> {
-        self.send_request()
+        let data = DataSend::new();
+        self.send_request(data)
             .await
             .context("Failed to connect to remote node")?;
         tracing::info!("Handshake ended succesfully!");
@@ -32,19 +35,15 @@ impl SolanaClient {
         // TODO Check Http Response - Based on this, either continue if OK or return Enum ConnectionError
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
-        match self.send_request().await {
+        let data = DataSend::new();
+        match self.send_request(data).await {
             Ok(response) => Ok(response),
             Err(_) => Err(anyhow!("Error")),
         }
     }
 
     #[tracing::instrument(name = "Sending HTTP request", skip(self))]
-    async fn send_request(&self) -> Result<Response, reqwest::Error> {
-        self.http_client
-            .post(&self.uri)
-            .header("Content-Type", "application/json")
-            .body(r#"{"jsonrpc":"2.0","id":1,"method":"getVersion"}"#)
-            .send()
-            .await
+    async fn send_request(&self, data: DataSend) -> Result<Response, reqwest::Error> {
+        self.http_client.post(&self.uri).json(&data).send().await
     }
 }
