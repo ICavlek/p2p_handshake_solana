@@ -10,6 +10,14 @@ pub struct SolanaClient {
     uri: String,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum SolanaClientError {
+    #[error("HTTP Response error.")]
+    HttpResponseError,
+    #[error(transparent)]
+    UnexpectedError(#[from] anyhow::Error),
+}
+
 impl SolanaClient {
     #[tracing::instrument(name = "Init Client")]
     pub fn new(uri: String) -> Self {
@@ -21,14 +29,22 @@ impl SolanaClient {
     }
 
     #[tracing::instrument(name = "Handshake", skip(self))]
-    pub async fn handshake(&self) -> Result<(), anyhow::Error> {
+    pub async fn handshake(&self) -> Result<(), SolanaClientError> {
         // TODO Check Http Response - Based on this, either continue if OK or return Enum ConnectionError
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
         let response = self.get_version().await.context("Failed to get version")?;
-        let status = response.status();
-        println!("{}", status);
-        let data = response.text().await?;
+        match response.status().as_u16() {
+            200 => tracing::info!("Remote node returned 200 OK"),
+            _ => return Err(SolanaClientError::HttpResponseError),
+        };
+
+        let data = response.text().await.map_err(|e| {
+            anyhow::anyhow!(
+                "Something went wrong with getting data, original error: {}",
+                e
+            )
+        })?;
         println!("{}", data);
         tracing::info!("Handshake ended succesfully!");
         Ok(())

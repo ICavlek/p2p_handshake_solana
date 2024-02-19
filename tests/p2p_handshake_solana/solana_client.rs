@@ -14,6 +14,19 @@ async fn handshake_returns_200_for_valid_form_data() {
     assert_eq!(response.status().as_u16(), 200);
 }
 
+#[tokio::test]
+async fn remote_node_returns_500() {
+    let mock_server = MockServer::start().await;
+    let solana_client = SolanaClient::new(mock_server.uri());
+
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(500))
+        .mount(&mock_server)
+        .await;
+    let response = solana_client.get_version().await.unwrap();
+    assert_eq!(response.status().as_u16(), 500);
+}
+
 // TODO Connection time out test
 // TODO Connection failed test
 // TODO Wrong data test
