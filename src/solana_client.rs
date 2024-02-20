@@ -29,14 +29,23 @@ impl SolanaClient {
     }
 
     #[tracing::instrument(name = "Handshake", skip(self))]
-    pub async fn handshake(&self) -> Result<DataReceive, SolanaClientError> {
+    pub async fn handshake(&self) -> Result<(), anyhow::Error> {
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
         let data = DataSend::new();
-        let response = self
-            .get_version(data)
+        self.get_version(data)
             .await
-            .context("Failed to get version")?;
+            .context("Failed to invoke get version")?;
+        tracing::info!("Successfully performed handshake");
+        Ok(())
+    }
+
+    #[tracing::instrument(name = "Invoking get version", skip(self))]
+    pub async fn get_version(&self, data: DataSend) -> Result<DataReceive, SolanaClientError> {
+        let response = self
+            .send_request(data)
+            .await
+            .context("Failed to connect to remote node")?;
         match response.status() {
             StatusCode::OK => tracing::info!("Remote node returned 200 OK"),
             _ => return Err(SolanaClientError::HttpResponseError),
@@ -50,13 +59,6 @@ impl SolanaClient {
         })?;
         let data_receive = serde_json::from_str::<DataReceive>(&data).unwrap();
         Ok(data_receive)
-    }
-
-    #[tracing::instrument(name = "Invoking get version", skip(self))]
-    pub async fn get_version(&self, data: DataSend) -> Result<Response, anyhow::Error> {
-        self.send_request(data)
-            .await
-            .context("Failed to connect to remote node")
     }
 
     #[tracing::instrument(name = "Sending HTTP request", skip(self))]

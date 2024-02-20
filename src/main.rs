@@ -20,6 +20,5 @@ async fn main() -> anyhow::Result<()> {
         .handshake()
         .await
         .context("Failed to perform handshake")?;
-    tracing::info!("Handshake completed succesfully");
     Ok(())
 }

@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 #[derive(Debug, serde::Serialize)]
 pub struct DataSend {
     jsonrpc: String,
@@ -24,7 +26,7 @@ impl Default for DataSend {
     }
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct DataReceive {
     #[allow(dead_code)]
     jsonrpc: String,
@@ -34,7 +36,17 @@ pub struct DataReceive {
     id: u8,
 }
 
-#[derive(Debug, serde::Deserialize)]
+impl Default for DataReceive {
+    fn default() -> Self {
+        Self {
+            jsonrpc: "2.0".to_string(),
+            result: DataReceiveResult::default(),
+            id: 1,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct DataReceiveResult {
     #[serde(rename = "feature-set")]
     #[allow(dead_code)]
@@ -42,4 +54,13 @@ pub struct DataReceiveResult {
     #[serde(rename = "solana-core")]
     #[allow(dead_code)]
     solana_core: String,
+}
+
+impl Default for DataReceiveResult {
+    fn default() -> Self {
+        Self {
+            feature_set: 3580551090,
+            solana_core: "1.17.23".to_string(),
+        }
+    }
 }
