@@ -44,25 +44,27 @@ impl SolanaClient {
 
     #[tracing::instrument(name = "Invoking get version", skip(self, data))]
     pub async fn get_version(&self, data: DataSend) -> Result<DataReceive, SolanaClientError> {
-        let response = self.send_request(data).await.map_err(|e| {
-            tracing::error!("Error sending request");
-            SolanaClientError::UnexpectedError(anyhow::anyhow!(e))
-        })?;
+        let response = self
+            .send_request(data)
+            .await
+            .context("Failed to get response from the remote node")?;
         match response.status() {
             StatusCode::OK => tracing::info!("Remote node returned 200 OK"),
             _ => return Err(SolanaClientError::HttpResponseError),
         };
-        let data = response.text().await.map_err(|e| {
-            tracing::error!("Error extracting text");
-            SolanaClientError::UnexpectedError(anyhow::anyhow!(e))
-        })?;
+        let data = response
+            .text()
+            .await
+            .context("Something went wrong with extracting data")?;
         let data_receive = match serde_json::from_str::<DataReceive>(&data) {
             Ok(data_json) => data_json,
             Err(_) => match serde_json::from_str::<DataReceiveError>(&data) {
                 Ok(_) => return Err(SolanaClientError::SentDataError),
                 Err(e) => {
-                    tracing::error!("Error extracting data error");
-                    return Err(SolanaClientError::UnexpectedError(anyhow::anyhow!(e)));
+                    return Err(SolanaClientError::UnexpectedError(anyhow::anyhow!(
+                        "Unexpected error response provided from the node: {}",
+                        e
+                    )))
                 }
             },
         };
