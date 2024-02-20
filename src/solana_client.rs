@@ -2,7 +2,7 @@ use anyhow::Context;
 use reqwest::{Client, Response, StatusCode};
 use std::time::Duration;
 
-use crate::domain::{DataReceive, DataSend};
+use crate::domain::{DataReceive, DataReceiveError, DataSend};
 
 #[derive(Debug)]
 pub struct SolanaClient {
@@ -14,8 +14,8 @@ pub struct SolanaClient {
 pub enum SolanaClientError {
     #[error("HTTP Response error: Remote node did not return 200 OK")]
     HttpResponseError,
-    #[error("Data error: Received data is not valid")]
-    DataError,
+    #[error("Sent data error: Sent data is not valid")]
+    SentDataError,
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -34,7 +34,7 @@ impl SolanaClient {
     pub async fn handshake(&self) -> Result<(), anyhow::Error> {
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
-        let data = DataSend::new();
+        let data = DataSend::default();
         self.get_version(data)
             .await
             .context("Failed to invoke get version")?;
@@ -59,8 +59,16 @@ impl SolanaClient {
             )
         })?;
         let data_receive = match serde_json::from_str::<DataReceive>(&data) {
-            Ok(data) => data,
-            Err(_) => return Err(SolanaClientError::DataError),
+            Ok(data_json) => data_json,
+            Err(_) => match serde_json::from_str::<DataReceiveError>(&data) {
+                Ok(_) => return Err(SolanaClientError::SentDataError),
+                Err(e) => {
+                    return Err(SolanaClientError::UnexpectedError(anyhow::anyhow!(
+                        "Unexpected error response provided from the node: {}",
+                        e
+                    )))
+                }
+            },
         };
         Ok(data_receive)
     }

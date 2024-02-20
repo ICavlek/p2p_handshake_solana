@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use p2p_handshake_solana::{
-    domain::{DataReceive, DataSend},
+    domain::{DataReceive, DataReceiveError, DataSend},
     solana_client::{SolanaClient, SolanaClientError},
 };
 use wiremock::{matchers::method, Mock, MockServer, ResponseTemplate};
@@ -73,5 +73,21 @@ async fn remote_node_returns_data_after_connection_timeout() {
         response,
         Err(SolanaClientError::UnexpectedError(_))
     ));
+}
+
+#[tokio::test]
+async fn solana_client_returns_error_for_wrong_data_provided() {
+    let mock_server = MockServer::start().await;
+    let solana_client = SolanaClient::new(mock_server.uri());
+    let wrong_data = DataSend::new("wrongMethodName".to_string());
+    let wrong_data_default_response = DataReceiveError::default();
+
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(wrong_data_default_response))
+        .mount(&mock_server)
+        .await;
+    let response = solana_client.get_version(wrong_data).await;
+
+    assert!(matches!(response, Err(SolanaClientError::SentDataError)));
 }
 // TODO Wrong data test
