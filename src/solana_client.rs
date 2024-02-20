@@ -2,7 +2,7 @@ use anyhow::Context;
 use reqwest::{Client, Response, StatusCode};
 use std::time::Duration;
 
-use crate::domain::DataSend;
+use crate::domain::{DataReceive, DataSend};
 
 #[derive(Debug)]
 pub struct SolanaClient {
@@ -44,7 +44,8 @@ impl SolanaClient {
                 e
             )
         })?;
-        println!("{}", data);
+        let data_receive = serde_json::from_str::<DataReceive>(&data).unwrap();
+        println!("{:#?}", data_receive);
         tracing::info!("Handshake ended succesfully!");
         Ok(())
     }

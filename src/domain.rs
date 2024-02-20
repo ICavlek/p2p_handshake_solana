@@ -23,3 +23,23 @@ impl Default for DataSend {
         Self::new()
     }
 }
+
+#[derive(Debug, serde::Deserialize)]
+pub struct DataReceive {
+    #[allow(dead_code)]
+    jsonrpc: String,
+    #[allow(dead_code)]
+    result: DataReceiveResult,
+    #[allow(dead_code)]
+    id: u8,
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct DataReceiveResult {
+    #[serde(rename = "feature-set")]
+    #[allow(dead_code)]
+    feature_set: u32,
+    #[serde(rename = "solana-core")]
+    #[allow(dead_code)]
+    solana_core: String,
+}
