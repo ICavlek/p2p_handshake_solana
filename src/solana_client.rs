@@ -29,7 +29,7 @@ impl SolanaClient {
     }
 
     #[tracing::instrument(name = "Handshake", skip(self))]
-    pub async fn handshake(&self) -> Result<(), SolanaClientError> {
+    pub async fn handshake(&self) -> Result<DataReceive, SolanaClientError> {
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
         let response = self.get_version().await.context("Failed to get version")?;
@@ -45,9 +45,7 @@ impl SolanaClient {
             )
         })?;
         let data_receive = serde_json::from_str::<DataReceive>(&data).unwrap();
-        println!("{:#?}", data_receive);
-        tracing::info!("Handshake ended succesfully!");
-        Ok(())
+        Ok(data_receive)
     }
 
     #[tracing::instrument(name = "Invoking get version", skip(self))]
