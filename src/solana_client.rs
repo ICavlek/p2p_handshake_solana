@@ -42,7 +42,7 @@ impl SolanaClient {
         Ok(())
     }
 
-    #[tracing::instrument(name = "Invoking get version", skip(self))]
+    #[tracing::instrument(name = "Invoking get version", skip(self, data))]
     pub async fn get_version(&self, data: DataSend) -> Result<DataReceive, SolanaClientError> {
         let response = self
             .send_request(data)
@@ -71,7 +71,7 @@ impl SolanaClient {
         Ok(data_receive)
     }
 
-    #[tracing::instrument(name = "Sending HTTP request", skip(self))]
+    #[tracing::instrument(name = "Sending HTTP request", skip(self, data))]
     async fn send_request(&self, data: DataSend) -> Result<Response, reqwest::Error> {
         self.http_client.post(&self.uri).json(&data).send().await
     }
