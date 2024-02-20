@@ -52,12 +52,10 @@ impl SolanaClient {
             StatusCode::OK => tracing::info!("Remote node returned 200 OK"),
             _ => return Err(SolanaClientError::HttpResponseError),
         };
-        let data = response.text().await.map_err(|e| {
-            anyhow::anyhow!(
-                "Something went wrong with extracting data from response, original error: {}",
-                e
-            )
-        })?;
+        let data = response
+            .text()
+            .await
+            .context("Something went wrong with extracting data")?;
         let data_receive = match serde_json::from_str::<DataReceive>(&data) {
             Ok(data_json) => data_json,
             Err(_) => match serde_json::from_str::<DataReceiveError>(&data) {
