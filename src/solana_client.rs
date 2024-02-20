@@ -12,8 +12,10 @@ pub struct SolanaClient {
 
 #[derive(thiserror::Error, Debug)]
 pub enum SolanaClientError {
-    #[error("HTTP Response error, remote node did not return 200 OK")]
+    #[error("HTTP Response error: Remote node did not return 200 OK")]
     HttpResponseError,
+    #[error("Data error: Received data is not valid")]
+    DataError,
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -45,19 +47,21 @@ impl SolanaClient {
         let response = self
             .send_request(data)
             .await
-            .context("Failed to connect to remote node")?;
+            .context("Failed to get response from the remote node")?;
         match response.status() {
             StatusCode::OK => tracing::info!("Remote node returned 200 OK"),
             _ => return Err(SolanaClientError::HttpResponseError),
         };
-
         let data = response.text().await.map_err(|e| {
             anyhow::anyhow!(
-                "Something went wrong with getting data, original error: {}",
+                "Something went wrong with extracting data from response, original error: {}",
                 e
             )
         })?;
-        let data_receive = serde_json::from_str::<DataReceive>(&data).unwrap();
+        let data_receive = match serde_json::from_str::<DataReceive>(&data) {
+            Ok(data) => data,
+            Err(_) => return Err(SolanaClientError::DataError),
+        };
         Ok(data_receive)
     }
 

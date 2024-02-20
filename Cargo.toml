@@ -19,7 +19,7 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
 tracing-bunyan-formatter = "0.3"
-tracing-log = "0.1"
+tracing-log = "0.2"
 thiserror = "1"
 
 [dependencies.reqwest]
