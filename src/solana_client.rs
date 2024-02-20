@@ -32,7 +32,11 @@ impl SolanaClient {
     pub async fn handshake(&self) -> Result<DataReceive, SolanaClientError> {
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
-        let response = self.get_version().await.context("Failed to get version")?;
+        let data = DataSend::new();
+        let response = self
+            .get_version(data)
+            .await
+            .context("Failed to get version")?;
         match response.status() {
             StatusCode::OK => tracing::info!("Remote node returned 200 OK"),
             _ => return Err(SolanaClientError::HttpResponseError),
@@ -49,8 +53,7 @@ impl SolanaClient {
     }
 
     #[tracing::instrument(name = "Invoking get version", skip(self))]
-    pub async fn get_version(&self) -> Result<Response, anyhow::Error> {
-        let data = DataSend::new();
+    pub async fn get_version(&self, data: DataSend) -> Result<Response, anyhow::Error> {
         self.send_request(data)
             .await
             .context("Failed to connect to remote node")
