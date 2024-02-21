@@ -2,13 +2,6 @@ use clap::{command, Parser};
 
 /// Arguments structure used to collect necessary information from the user
 /// for the Solana Client. It is based on clap crate.
-///
-/// #Example
-///
-/// ```
-/// use clap::Parser;
-/// let args = Arguments::parse();
-/// ```
 #[derive(Parser, Debug)]
 #[command(version)]
 #[command(propagate_version = true)]

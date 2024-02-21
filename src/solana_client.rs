@@ -32,9 +32,11 @@ impl SolanaClient {
     /// # Example
     ///
     /// ```
+    /// use p2p_handshake_solana::solana_client::SolanaClient;
+    ///
     /// let uri = "http://127.0.0.1:8899".to_string();
     /// let timeout = 200; // In miliseconds
-    /// let solana_client = SolanaClient(uri, timeout);
+    /// let solana_client = SolanaClient::new(uri, timeout);
     /// ```
     #[tracing::instrument(name = "Init Client")]
     pub fn new(uri: String, timeout: u64) -> Self {
@@ -55,10 +57,14 @@ impl SolanaClient {
     /// # Example
     ///
     /// ```
+    /// use p2p_handshake_solana::solana_client::SolanaClient;
+    ///
     /// let uri = "http://api.devnet.solana.com".to_string();
     /// let timeout = 200; // In miliseconds
-    /// let solana_client = SolanaClient(uri, timeout);
-    /// solana_client.handshake().await?;
+    /// let solana_client = SolanaClient::new(uri, timeout);
+    /// let result = async {
+    ///     solana_client.handshake().await
+    /// };
     /// ```
     #[tracing::instrument(name = "Handshake", skip(self))]
     pub async fn handshake(&self) -> Result<(), anyhow::Error> {
@@ -79,11 +85,16 @@ impl SolanaClient {
     /// # Example
     ///
     /// ```
+    /// use p2p_handshake_solana::solana_client::SolanaClient;
+    /// use p2p_handshake_solana::domain::DataSend;
+    ///
     /// let uri = "http://api.devnet.solana.com".to_string();
     /// let timeout = 200; // In miliseconds
-    /// let solana_client = SolanaClient(uri, timeout);
-    /// let data = DataSend::new();
-    /// let response = solana_client.get_version(data).await.unwrap(); // If no error, proper data
+    /// let solana_client = SolanaClient::new(uri, timeout);
+    /// let data = DataSend::default();
+    /// let response = async {
+    ///     solana_client.get_version(data).await.unwrap()
+    /// }; // If no error, proper data
     /// ```
     #[tracing::instrument(name = "Invoking get version", skip(self, data))]
     pub async fn get_version(&self, data: DataSend) -> Result<DataReceive, SolanaClientError> {

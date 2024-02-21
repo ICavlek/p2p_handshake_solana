@@ -11,6 +11,7 @@ use tracing_subscriber::{fmt::MakeWriter, layer::SubscriberExt, EnvFilter, Regis
 /// #Example
 ///
 /// ```
+/// use p2p_handshake_solana::telemetry::get_subscriber;
 /// let subscriber = get_subscriber(
 ///     "p2p_handshake_solana".into(),
 ///     "info".into(),
@@ -39,6 +40,7 @@ where
 /// #Example
 ///
 /// ```
+/// use p2p_handshake_solana::telemetry::{get_subscriber, init_subscriber};
 /// let subscriber = get_subscriber(
 ///     "p2p_handshake_solana".into(),
 ///     "info".into(),
