@@ -9,7 +9,7 @@ use wiremock::{matchers::method, Mock, MockServer, ResponseTemplate};
 #[tokio::test]
 async fn handshake_returns_200_for_valid_form_data() {
     let mock_server = MockServer::start().await;
-    let solana_client = SolanaClient::new(mock_server.uri());
+    let solana_client = SolanaClient::new(mock_server.uri(), 200);
     let data = DataSend::default();
     let data_receive_default = DataReceive::default();
 
@@ -25,7 +25,7 @@ async fn handshake_returns_200_for_valid_form_data() {
 #[tokio::test]
 async fn remote_node_returns_500_for_internal_server_error() {
     let mock_server = MockServer::start().await;
-    let solana_client = SolanaClient::new(mock_server.uri());
+    let solana_client = SolanaClient::new(mock_server.uri(), 200);
     let data = DataSend::default();
 
     Mock::given(method("POST"))
@@ -43,7 +43,7 @@ async fn remote_node_returns_500_for_internal_server_error() {
 #[tokio::test]
 async fn remote_node_returns_408_for_connection_timeout_error() {
     let mock_server = MockServer::start().await;
-    let solana_client = SolanaClient::new(mock_server.uri());
+    let solana_client = SolanaClient::new(mock_server.uri(), 200);
     let data = DataSend::default();
 
     Mock::given(method("POST"))
@@ -61,7 +61,7 @@ async fn remote_node_returns_408_for_connection_timeout_error() {
 #[tokio::test]
 async fn remote_node_returns_data_after_connection_timeout() {
     let mock_server = MockServer::start().await;
-    let solana_client = SolanaClient::new(mock_server.uri());
+    let solana_client = SolanaClient::new(mock_server.uri(), 200);
     let data = DataSend::default();
 
     Mock::given(method("POST"))
@@ -78,7 +78,7 @@ async fn remote_node_returns_data_after_connection_timeout() {
 #[tokio::test]
 async fn solana_client_returns_error_for_wrong_data_provided() {
     let mock_server = MockServer::start().await;
-    let solana_client = SolanaClient::new(mock_server.uri());
+    let solana_client = SolanaClient::new(mock_server.uri(), 200);
     let wrong_data = DataSend::new("wrongMethodName".to_string());
     let wrong_data_default_response = DataReceiveError::default();
 
@@ -94,7 +94,7 @@ async fn solana_client_returns_error_for_wrong_data_provided() {
 #[tokio::test]
 async fn solana_client_returns_unexpected_error_for_corrupted_data() {
     let mock_server = MockServer::start().await;
-    let solana_client = SolanaClient::new(mock_server.uri());
+    let solana_client = SolanaClient::new(mock_server.uri(), 200);
     let correct_data = DataSend::default();
     let corrupt_data_respond = DataReceive::new("PotentiallyHazardousData".to_string());
 

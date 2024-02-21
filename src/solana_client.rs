@@ -22,9 +22,9 @@ pub enum SolanaClientError {
 
 impl SolanaClient {
     #[tracing::instrument(name = "Init Client")]
-    pub fn new(uri: String) -> Self {
+    pub fn new(uri: String, timeout: u64) -> Self {
         let http_client = Client::builder()
-            .timeout(Duration::from_millis(200))
+            .timeout(Duration::from_millis(timeout))
             .build()
             .unwrap();
         Self { http_client, uri }
