@@ -1,5 +1,3 @@
-use anyhow::Context;
-
 use p2p_handshake_solana::solana_client::SolanaClient;
 use p2p_handshake_solana::telemetry::{get_subscriber, init_subscriber};
 
@@ -17,9 +15,12 @@ async fn main() -> anyhow::Result<()> {
     // TODO Document class
     // TODO Update readme
     let solana_client = SolanaClient::new(uri.to_owned());
-    solana_client
-        .handshake()
-        .await
-        .context("Failed to perform handshake")?;
+    match solana_client.handshake().await {
+        Ok(_) => tracing::info!("Successfully performed handshake"),
+        Err(e) => {
+            tracing::error!("Error performing handshake: {}", e);
+            return Err(e);
+        }
+    };
     Ok(())
 }

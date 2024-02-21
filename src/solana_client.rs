@@ -35,17 +35,9 @@ impl SolanaClient {
         // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
         // Ok(), if not return DataError
         let data = DataSend::default();
-        match self
-            .get_version(data)
+        self.get_version(data)
             .await
-            .context("Failed to invoke get version")
-        {
-            Ok(_) => tracing::info!("Successfully performed handshake"),
-            Err(e) => {
-                tracing::error!("Error performing handshake: {}", e);
-                return Err(e);
-            }
-        }
+            .context("Failed to invoke get version")?;
         Ok(())
     }
 
