@@ -27,11 +27,8 @@ impl Default for DataSend {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DataReceive {
-    #[allow(dead_code)]
     jsonrpc: String,
-    #[allow(dead_code)]
     result: DataReceiveResult,
-    #[allow(dead_code)]
     id: u8,
 }
 
@@ -48,10 +45,8 @@ impl Default for DataReceive {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DataReceiveResult {
     #[serde(rename = "feature-set")]
-    #[allow(dead_code)]
     feature_set: u32,
     #[serde(rename = "solana-core")]
-    #[allow(dead_code)]
     solana_core: String,
 }
 
@@ -66,11 +61,8 @@ impl Default for DataReceiveResult {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DataReceiveError {
-    #[allow(dead_code)]
     jsonrpc: String,
-    #[allow(dead_code)]
     error: DataReceiveResultError,
-    #[allow(dead_code)]
     id: u8,
 }
 
@@ -86,9 +78,7 @@ impl Default for DataReceiveError {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DataReceiveResultError {
-    #[allow(dead_code)]
     code: i32,
-    #[allow(dead_code)]
     message: String,
 }
 
