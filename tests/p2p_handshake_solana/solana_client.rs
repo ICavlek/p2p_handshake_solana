@@ -17,9 +17,9 @@ async fn handshake_returns_200_for_valid_form_data() {
         .respond_with(ResponseTemplate::new(200).set_body_json(data_receive_default))
         .mount(&mock_server)
         .await;
-    let response = solana_client.get_version(data).await.unwrap();
+    let response = solana_client.get_version(data).await;
 
-    assert!(matches!(response, _data_receive_default));
+    assert!(response.is_ok());
 }
 
 #[tokio::test]
