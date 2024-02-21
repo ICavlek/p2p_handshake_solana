@@ -90,4 +90,22 @@ async fn solana_client_returns_error_for_wrong_data_provided() {
 
     assert!(matches!(response, Err(SolanaClientError::SentDataError)));
 }
-// TODO Wrong data test
+
+#[tokio::test]
+async fn solana_client_returns_unexpected_error_for_corrupted_data() {
+    let mock_server = MockServer::start().await;
+    let solana_client = SolanaClient::new(mock_server.uri());
+    let correct_data = DataSend::default();
+    let corrupt_data_respond = DataReceive::new("PotentiallyHazardousData".to_string());
+
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(corrupt_data_respond))
+        .mount(&mock_server)
+        .await;
+    let response = solana_client.get_version(correct_data).await;
+
+    assert!(matches!(
+        response,
+        Err(SolanaClientError::UnexpectedError(_))
+    ));
+}

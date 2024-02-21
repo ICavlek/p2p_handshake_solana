@@ -25,7 +25,7 @@ impl Default for DataSend {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct DataReceive {
     jsonrpc: String,
     result: DataReceiveResult,
@@ -34,15 +34,26 @@ pub struct DataReceive {
 
 impl Default for DataReceive {
     fn default() -> Self {
+        Self::new("2.0".to_string())
+    }
+}
+
+impl DataReceive {
+    pub fn new(jsonrpc: String) -> Self {
         Self {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc,
             result: DataReceiveResult::default(),
             id: 1,
         }
     }
+
+    pub fn verify(&self) -> bool {
+        let default_receive = DataReceive::default();
+        self.eq(&default_receive)
+    }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct DataReceiveResult {
     #[serde(rename = "feature-set")]
     feature_set: u32,
@@ -88,5 +99,34 @@ impl Default for DataReceiveResultError {
             code: -32601,
             message: "Method not found".to_string(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::DataReceive;
+    use super::DataReceiveError;
+
+    #[test]
+    fn deserialize_string_to_data_receive_error() {
+        let error_response =
+            r#"{"jsonrpc":"2.0","error":{"code":-32601,"message":"Method not found"},"id":1}"#;
+        let data = serde_json::from_str::<DataReceiveError>(error_response);
+        assert!(data.is_ok());
+    }
+
+    #[test]
+    fn deserialize_wrong_string_to_data_receive_error() {
+        let error_response = r#"{error":{"code":-32601,"message":"Method not found"},"id":1}"#;
+        let data = serde_json::from_str::<DataReceiveError>(error_response);
+        assert!(data.is_err());
+    }
+
+    #[test]
+    fn deserialize_wrong_string_to_data_receive() {
+        let error_response =
+            r#"{"jsonrpc":"2.0","error":{"code":-32601,"message":"Method not found"},"id":1}"#;
+        let data = serde_json::from_str::<DataReceive>(error_response);
+        assert!(data.is_err());
     }
 }

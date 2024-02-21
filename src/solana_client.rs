@@ -55,23 +55,37 @@ impl SolanaClient {
             .text()
             .await
             .context("Something went wrong with extracting data")?;
-        let data_receive = match serde_json::from_str::<DataReceive>(&data) {
-            Ok(data_json) => data_json,
-            Err(_) => match serde_json::from_str::<DataReceiveError>(&data) {
-                Ok(_) => return Err(SolanaClientError::SentDataError),
-                Err(e) => {
-                    return Err(SolanaClientError::UnexpectedError(anyhow::anyhow!(
-                        "Unexpected error response provided from the node: {}",
-                        e
-                    )))
-                }
-            },
-        };
+        let data_receive = self.verify_returned_data(data)?;
         Ok(data_receive)
     }
 
     #[tracing::instrument(name = "Sending HTTP request", skip(self, data))]
     async fn send_request(&self, data: DataSend) -> Result<Response, reqwest::Error> {
         self.http_client.post(&self.uri).json(&data).send().await
+    }
+
+    #[tracing::instrument(name = "Verifying returned data", skip(self, data))]
+    fn verify_returned_data(&self, data: String) -> Result<DataReceive, SolanaClientError> {
+        match serde_json::from_str::<DataReceive>(&data) {
+            Ok(data_json) => {
+                if !data_json.verify() {
+                    return Err(SolanaClientError::UnexpectedError(anyhow::anyhow!(
+                        "Unexpected data returned from remote node, possibly corrupted"
+                    )));
+                }
+                Ok(data_json)
+            }
+            Err(_) => match serde_json::from_str::<DataReceiveError>(&data) {
+                Ok(_) => {
+                    return Err(SolanaClientError::SentDataError);
+                }
+                Err(e) => {
+                    return Err(SolanaClientError::UnexpectedError(anyhow::anyhow!(
+                        "Unexpected error response provided from the node: {}",
+                        e
+                    )));
+                }
+            },
+        }
     }
 }
