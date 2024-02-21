@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Structure used to be JSON serialized and sent to Solana node
 #[derive(Debug, serde::Serialize)]
 pub struct DataSend {
     jsonrpc: String,
@@ -25,6 +26,7 @@ impl Default for DataSend {
     }
 }
 
+/// Structure used to be JSON deserialized as a response from the Solana node
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct DataReceive {
     jsonrpc: String,
@@ -53,6 +55,7 @@ impl DataReceive {
     }
 }
 
+/// Substructure of the [`DataReceive`]
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct DataReceiveResult {
     #[serde(rename = "feature-set")]
@@ -70,6 +73,8 @@ impl Default for DataReceiveResult {
     }
 }
 
+/// Structure to be JSON deserialized as a response from the Solana node
+/// if the response is an error.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DataReceiveError {
     jsonrpc: String,
@@ -87,6 +92,7 @@ impl Default for DataReceiveError {
     }
 }
 
+/// Substructure of the [`DataReceiveError`]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DataReceiveResultError {
     code: i32,

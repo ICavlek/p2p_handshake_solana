@@ -4,12 +4,14 @@ use std::time::Duration;
 
 use crate::domain::{DataReceive, DataReceiveError, DataSend};
 
+/// Client that is used to establish communication with the remote node.
 #[derive(Debug)]
 pub struct SolanaClient {
     http_client: Client,
     uri: String,
 }
 
+/// Error enumeration to represent higher abstraction level of errors.
 #[derive(thiserror::Error, Debug)]
 pub enum SolanaClientError {
     #[error("HTTP Response error: Remote node did not return 200 OK")]
@@ -21,6 +23,19 @@ pub enum SolanaClientError {
 }
 
 impl SolanaClient {
+    /// Creates a Solana client based on provided uri and timeout arguments
+    ///
+    /// The uri is an HTTP URL, usually for port 8899, as in
+    /// http://127.0.0.1:8899. To access official Solana devnet,
+    /// <http://api.devnet.solana.com> without port has to be used.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let uri = "http://127.0.0.1:8899".to_string();
+    /// let timeout = 200; // In miliseconds
+    /// let solana_client = SolanaClient(uri, timeout);
+    /// ```
     #[tracing::instrument(name = "Init Client")]
     pub fn new(uri: String, timeout: u64) -> Self {
         let http_client = Client::builder()
@@ -30,6 +45,21 @@ impl SolanaClient {
         Self { http_client, uri }
     }
 
+    /// Solana client performs handshake with the remote node provided in
+    /// [`new`]. Handshake is a wrapper around the [`get_version`] function
+    /// and it returns if it succeeded or not.
+    ///
+    /// [`new`]: SolanaClient::new
+    /// [`get_version`]: SolanaClient::get_version
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let uri = "http://api.devnet.solana.com".to_string();
+    /// let timeout = 200; // In miliseconds
+    /// let solana_client = SolanaClient(uri, timeout);
+    /// solana_client.handshake().await?;
+    /// ```
     #[tracing::instrument(name = "Handshake", skip(self))]
     pub async fn handshake(&self) -> Result<(), anyhow::Error> {
         let data = DataSend::default();
@@ -39,6 +69,22 @@ impl SolanaClient {
         Ok(())
     }
 
+    /// Solana client calls the getVersion method specified in here
+    /// <https://solana.com/docs/rpc/http/getversion>. It checks the HTTP response,
+    /// returned data and eventually verifies if the returned data is correct.
+    /// It is necessary to provide data which is going to be sent to the remote node.
+    /// Template data has been created in [`DataSend`].
+    ///
+    /// [`DataSend`]: DataSend
+    /// # Example
+    ///
+    /// ```
+    /// let uri = "http://api.devnet.solana.com".to_string();
+    /// let timeout = 200; // In miliseconds
+    /// let solana_client = SolanaClient(uri, timeout);
+    /// let data = DataSend::new();
+    /// let response = solana_client.get_version(data).await.unwrap(); // If no error, proper data
+    /// ```
     #[tracing::instrument(name = "Invoking get version", skip(self, data))]
     pub async fn get_version(&self, data: DataSend) -> Result<DataReceive, SolanaClientError> {
         let response = self
@@ -57,11 +103,18 @@ impl SolanaClient {
         Ok(data_receive)
     }
 
+    /// Http client sends request to the remote node
     #[tracing::instrument(name = "Sending HTTP request", skip(self, data))]
     async fn send_request(&self, data: DataSend) -> Result<Response, reqwest::Error> {
         self.http_client.post(&self.uri).json(&data).send().await
     }
 
+    /// Returned data verification. First it tries to deserialize it in DataReceive. If it is
+    /// OK, then verify if the data is as expected. If it is, verification has succeeded,
+    /// otherwise unexpected data is received. If the initial deserialize fails, it tries
+    /// to serialize it in DataReceiveError, struct that is according to the returned error
+    /// from remote node. If it succeeds, proper error has been returned. Otherwise, unexpected
+    /// error form has been received from the remote node.
     #[tracing::instrument(name = "Verifying returned data", skip(self, data))]
     fn verify_returned_data(&self, data: String) -> Result<DataReceive, SolanaClientError> {
         match serde_json::from_str::<DataReceive>(&data) {
