@@ -14,7 +14,7 @@ pub struct SolanaClient {
 pub enum SolanaClientError {
     #[error("HTTP Response error: Remote node did not return 200 OK")]
     HttpResponseError,
-    #[error("Sent data error: Sent data is not valid")]
+    #[error("Sent data error: Sent data to remote node is not valid")]
     SentDataError,
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
@@ -32,8 +32,6 @@ impl SolanaClient {
 
     #[tracing::instrument(name = "Handshake", skip(self))]
     pub async fn handshake(&self) -> Result<(), anyhow::Error> {
-        // TODO Check Data returned - Potentially malicious, parse in Domain struct. If Ok, return
-        // Ok(), if not return DataError
         let data = DataSend::default();
         self.get_version(data)
             .await
