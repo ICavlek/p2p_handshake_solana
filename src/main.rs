@@ -1,7 +1,7 @@
 use clap::Parser;
 
 use p2p_handshake_solana::parser_arguments::Arguments;
-use p2p_handshake_solana::solana::client::SolanaClient;
+use p2p_handshake_solana::solana::client_pool::SolanaClientPool;
 use p2p_handshake_solana::telemetry::{get_subscriber, init_subscriber};
 
 #[tokio::main]
@@ -15,14 +15,7 @@ async fn main() -> anyhow::Result<()> {
     );
     init_subscriber(subscriber);
 
-    let solana_client = SolanaClient::new(args.uri, args.timeout);
-    match solana_client.handshake().await {
-        Ok(_) => tracing::info!("Successfully performed handshake"),
-        Err(e) => {
-            tracing::error!("Error performing handshake: {}", e);
-            return Err(e);
-        }
-    };
-
+    let solana_client_pool = SolanaClientPool::new(args.uri_nodes, args.timeout);
+    solana_client_pool.run().await?;
     Ok(())
 }
