@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use p2p_handshake_solana::{
-    domain::{DataReceive, DataReceiveError, DataSend},
-    solana_client::{SolanaClient, SolanaClientError},
+    solana::client::{SolanaClient, SolanaClientError},
+    solana::domain::{DataReceive, DataReceiveError, DataSend},
 };
 use wiremock::{matchers::method, Mock, MockServer, ResponseTemplate};
 

@@ -1,7 +1,7 @@
 use clap::Parser;
 
 use p2p_handshake_solana::parser_arguments::Arguments;
-use p2p_handshake_solana::solana_client::SolanaClient;
+use p2p_handshake_solana::solana::client::SolanaClient;
 use p2p_handshake_solana::telemetry::{get_subscriber, init_subscriber};
 
 #[tokio::main]

@@ -2,7 +2,7 @@ use anyhow::Context;
 use reqwest::{Client, Response, StatusCode};
 use std::time::Duration;
 
-use crate::domain::{DataReceive, DataReceiveError, DataSend};
+use crate::solana::domain::{DataReceive, DataReceiveError, DataSend};
 
 /// Client that is used to establish communication with the remote node.
 #[derive(Debug)]
@@ -32,7 +32,7 @@ impl SolanaClient {
     /// # Example
     ///
     /// ```
-    /// use p2p_handshake_solana::solana_client::SolanaClient;
+    /// use p2p_handshake_solana::solana::client::SolanaClient;
     ///
     /// let uri = "http://127.0.0.1:8899".to_string();
     /// let timeout = 200; // In miliseconds
@@ -57,7 +57,7 @@ impl SolanaClient {
     /// # Example
     ///
     /// ```
-    /// use p2p_handshake_solana::solana_client::SolanaClient;
+    /// use p2p_handshake_solana::solana::client::SolanaClient;
     ///
     /// let uri = "http://api.devnet.solana.com".to_string();
     /// let timeout = 200; // In miliseconds
@@ -85,8 +85,8 @@ impl SolanaClient {
     /// # Example
     ///
     /// ```
-    /// use p2p_handshake_solana::solana_client::SolanaClient;
-    /// use p2p_handshake_solana::domain::DataSend;
+    /// use p2p_handshake_solana::solana::client::SolanaClient;
+    /// use p2p_handshake_solana::solana::domain::DataSend;
     ///
     /// let uri = "http://api.devnet.solana.com".to_string();
     /// let timeout = 200; // In miliseconds
