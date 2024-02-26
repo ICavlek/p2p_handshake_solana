@@ -49,9 +49,18 @@ impl DataReceive {
         }
     }
 
+    pub fn new_testnet(jsonrpc: String) -> Self {
+        Self {
+            jsonrpc,
+            result: DataReceiveResult::testnet(),
+            id: 1,
+        }
+    }
+
     pub fn verify(&self) -> bool {
         let default_receive = DataReceive::default();
-        self.eq(&default_receive)
+        let default_testnet = DataReceive::new_testnet("2.0".to_string());
+        self.eq(&default_receive) || self.eq(&default_testnet)
     }
 }
 
@@ -69,6 +78,15 @@ impl Default for DataReceiveResult {
         Self {
             feature_set: 3580551090,
             solana_core: "1.17.23".to_string(),
+        }
+    }
+}
+
+impl DataReceiveResult {
+    fn testnet() -> Self {
+        Self {
+            feature_set: 756280933,
+            solana_core: "1.18.1".to_string(),
         }
     }
 }
