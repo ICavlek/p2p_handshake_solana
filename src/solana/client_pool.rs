@@ -35,9 +35,7 @@ impl SolanaClientPool {
                 Ok(()) => {
                     tracing::info!("Successfully performed handshake for Node {}", node);
                 }
-                Err(e) => {
-                    tracing::error!(error.cause_chain = ?e, error.message = %e,"Error with Node {}", node);
-                }
+                Err(_) => {}
             }
         }
         Ok(())
@@ -49,7 +47,7 @@ impl SolanaClientPool {
         match solana_client.handshake().await {
             Ok(_) => Ok(()),
             Err(e) => {
-                tracing::error!("Error performing handshake: {}", e);
+                tracing::error!(error.cause_chain = ?e, error.message = %e, "Error performing handshake: {}", e);
                 Err(anyhow::anyhow!("Error performing handshake: {}", e))
             }
         }

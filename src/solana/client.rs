@@ -38,7 +38,6 @@ impl SolanaClient {
     /// let timeout = 200; // In miliseconds
     /// let solana_client = SolanaClient::new(uri, timeout);
     /// ```
-    #[tracing::instrument(name = "Init Client")]
     pub fn new(uri: String, timeout: u64) -> Self {
         let http_client = Client::builder()
             .timeout(Duration::from_millis(timeout))
@@ -66,7 +65,6 @@ impl SolanaClient {
     ///     solana_client.handshake().await
     /// };
     /// ```
-    #[tracing::instrument(name = "Handshake", skip(self))]
     pub async fn handshake(&self) -> Result<(), anyhow::Error> {
         let data = DataSend::default();
         self.get_version(data)
@@ -96,7 +94,6 @@ impl SolanaClient {
     ///     solana_client.get_version(data).await.unwrap()
     /// }; // If no error, proper data
     /// ```
-    #[tracing::instrument(name = "Invoking get version", skip(self, data))]
     pub async fn get_version(&self, data: DataSend) -> Result<DataReceive, SolanaClientError> {
         let response = self
             .send_request(data)
@@ -115,7 +112,6 @@ impl SolanaClient {
     }
 
     /// Http client sends request to the remote node
-    #[tracing::instrument(name = "Sending HTTP request", skip(self, data))]
     async fn send_request(&self, data: DataSend) -> Result<Response, reqwest::Error> {
         self.http_client.post(&self.uri).json(&data).send().await
     }
@@ -126,7 +122,6 @@ impl SolanaClient {
     /// to serialize it in DataReceiveError, struct that is according to the returned error
     /// from remote node. If it succeeds, proper error has been returned. Otherwise, unexpected
     /// error form has been received from the remote node.
-    #[tracing::instrument(name = "Verifying returned data", skip(self, data))]
     fn verify_returned_data(&self, data: String) -> Result<DataReceive, SolanaClientError> {
         match serde_json::from_str::<DataReceive>(&data) {
             Ok(data_json) => {
