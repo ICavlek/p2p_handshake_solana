@@ -31,11 +31,8 @@ impl SolanaClientPool {
                     Err(anyhow::anyhow!(e))
                 }
             };
-            match result {
-                Ok(()) => {
-                    tracing::info!("Successfully performed handshake for Node {}", node);
-                }
-                Err(_) => {}
+            if let Ok(()) = result {
+                tracing::info!("Successfully performed handshake for Node {}", node);
             }
         }
         Ok(())

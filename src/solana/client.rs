@@ -133,15 +133,11 @@ impl SolanaClient {
                 Ok(data_json)
             }
             Err(_) => match serde_json::from_str::<DataReceiveError>(&data) {
-                Ok(_) => {
-                    return Err(SolanaClientError::SentDataError);
-                }
-                Err(e) => {
-                    return Err(SolanaClientError::UnexpectedError(anyhow::anyhow!(
-                        "Unexpected error response provided from the node: {}",
-                        e
-                    )));
-                }
+                Ok(_) => Err(SolanaClientError::SentDataError),
+                Err(e) => Err(SolanaClientError::UnexpectedError(anyhow::anyhow!(
+                    "Unexpected error response provided from the node: {}",
+                    e
+                ))),
             },
         }
     }
