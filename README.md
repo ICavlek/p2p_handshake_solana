@@ -11,7 +11,7 @@ After successful installation, to start a local node, in a separate terminal fol
 solana-test-validator
 ```
 
-To communicate with the local node that has been provided by the solana-test-validator, following command has to be run:
+To communicate with the local node that has been started by the solana-test-validator, uri has to be provided. Additionally, optional timeout parameter can be added:
 
 ```bash
 $ cargo run http://127.0.0.1:8899 -t 1000
