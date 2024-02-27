@@ -100,7 +100,7 @@ impl SolanaClient {
             .await
             .context("Failed to get response from the remote node")?;
         match response.status() {
-            StatusCode::OK => tracing::info!("Remote node returned 200 OK"),
+            StatusCode::OK => {}
             _ => return Err(SolanaClientError::HttpResponseError),
         };
         let data = response
