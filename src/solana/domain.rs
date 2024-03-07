@@ -94,8 +94,8 @@ impl Default for DataReceiveResult {
 impl DataReceiveResult {
     fn testnet() -> Self {
         Self {
-            feature_set: 756280933,
-            solana_core: "1.18.1".to_string(),
+            feature_set: 3352961542,
+            solana_core: "1.18.2".to_string(),
         }
     }
 
